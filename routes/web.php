@@ -8,6 +8,7 @@ use App\Http\Controllers\OfferController;
 use App\Http\Controllers\OfferServiceController;
 use App\Http\Controllers\ReviewsController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\ServiceSpecialistController;
 use App\Http\Controllers\SessionController;
 use App\Http\Controllers\SpecialistController;
 use Illuminate\Support\Facades\Route;
@@ -86,6 +87,9 @@ Route::get('/userDetails/{id}', [AuthController::class, 'userDetails']);
 Route::get('/pendingReviews', [ReviewsController::class, 'getPendingReviews']);
 Route::get('approveReview', [ReviewsController::class, 'approveReview']);
 //Route::get('addSpecialist', [specialistController::class , 'store']);//edit specialist
+
+Route::get('/link-service-specialist/{service_id}/{specialist_id}', [ServiceSpecialistController::class, 'linkServiceToSpecialist']);
+Route::get('/unlink-service-specialist/{service_id}/{specialist_id}', [ServiceSpecialistController::class, 'unlinkServiceFromSpecialist']);
 
 
 

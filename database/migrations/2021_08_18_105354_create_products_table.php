@@ -13,11 +13,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('media', function (Blueprint $table) {
+        Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('file_name_1')->nullable();
-            $table->string('file_name_2')->nullable();
-            $table->string('description')->nullable();
+            $table->integer('question1');
+            $table->integer('question2');
+            $table->integer('question3');
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('media');
+        Schema::dropIfExists('products');
     }
 };

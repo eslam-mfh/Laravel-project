@@ -30,7 +30,8 @@ class DatabaseSeeder extends Seeder
         $this->call(SessionSeeder::class);
         $this->call(ReviewSeeder::class);
         $this->call(OfferSeeder::class);
-
+        $this->call(AdviceSeeder::class);
+       $this->call(MediaSeeder::class);
 
 
 

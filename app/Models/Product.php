@@ -5,12 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Media extends Model
+class Product extends Model
 {
     use HasFactory;
-    protected $fillable = [
-        'file_name_1',
-        'file_name_2',
-        'description',
-    ];
+    protected $fillable = ['question1', 'question2' , 'question3'];
 }

@@ -137,16 +137,12 @@ class OfferController extends Controller
 
     public function services($id)
     {
-        // جلب الـ service_id المرتبطة بالعرض
         $offer_services = Offer_Service::where('offer_id', $id)->pluck('service_id');
 
-        // جلب تفاصيل العرض
         $offer_details = Offer::find($id);
 
-        // جلب تفاصيل الخدمات المرتبطة بالعرض
         $services = Service::select('name', 'description')->whereIn('id', $offer_services)->get();
 
-        // إنشاء الرد مع تفاصيل العرض والخدمات
         $response = [
             'offer' => $offer_details,
             'services' => $services,

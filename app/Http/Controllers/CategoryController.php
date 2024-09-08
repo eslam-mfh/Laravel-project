@@ -14,7 +14,14 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $allCat= Category::all( 'id','name' ,'description', 'image') ;
+        $allCat = Category::all(['id', 'name', 'description', 'image']);
+
+
+        $allCat = $allCat->map(function ($cat) {
+            $cat->image_url = $cat->image ? url('images/' . $cat->image) : null;
+            return $cat;
+        });
+
         return response()->json($allCat);
     }
 
@@ -36,27 +43,25 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        // التحقق من صحة البيانات
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // التحقق من صحة الصورة
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // معالجة الصورة إذا كانت موجودة
         if ($request->hasFile('image')) {
-            $imageName = time().'.'.$request->image->extension();
-            $request->image->move(public_path('images'), $imageName);
-            $validatedData['image'] = $imageName;
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $imageName);
+            $validatedData['image'] = '/images/' . $imageName;
         }
 
         try {
             $cat = Category::create($validatedData);
-
             return response()->json([
                 "message" => "Category added successfully",
                 "data" => $cat,
-                "image_url" => isset($validatedData['image']) ? url('images/'.$validatedData['image']) : null // تضمين رابط الصورة في الاستجابة
+                "image_url" => isset($validatedData['image']) ? url($validatedData['image']) : null
             ], 201);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error adding category", "error" => $e->getMessage()], 500);
@@ -99,28 +104,28 @@ class CategoryController extends Controller
     public function update(Request $request, $id)
     {
         $validatedData = $request->validate([
-            'name' => 'nullable|string|max:255',
+            'name' => 'required|string|max:255',
             'description' => 'nullable|string|max:2000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // التحقق من صحة الصورة
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
             $cat = Category::findOrFail($id);
 
-            // معالجة الصورة إذا كانت موجودة
+
             if ($request->hasFile('image')) {
-                // حذف الصورة القديمة إذا كانت موجودة
+
                 if ($cat->image) {
-                    $oldImagePath = public_path('images/'.$cat->image);
+                    $oldImagePath = public_path($cat->image);
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
 
-                // حفظ الصورة الجديدة في ملف
+
                 $imageName = time().'.'.$request->image->extension();
                 $request->image->move(public_path('images'), $imageName);
-                $validatedData['image'] = $imageName;
+                $validatedData['image'] = '/images/' . $imageName;
             }
 
             $cat->update($validatedData);
@@ -128,7 +133,7 @@ class CategoryController extends Controller
             return response()->json([
                 "message" => "Category updated successfully",
                 "data" => $cat,
-                "image_url" => isset($validatedData['image']) ? url('images/'.$validatedData['image']) : url('images/'.$cat->image)
+                "image_url" => isset($validatedData['image']) ? url($validatedData['image']) : url($cat->image)
             ], 200);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error updating category", "error" => $e->getMessage()], 500);

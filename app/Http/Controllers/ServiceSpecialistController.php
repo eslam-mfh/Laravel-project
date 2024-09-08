@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Offer;
+use App\Models\Service;
 use App\Models\Service_Specialist;
 use App\Models\Specialist;
 use Illuminate\Http\Request;
@@ -85,6 +86,42 @@ class ServiceSpecialistController extends Controller
     {
         //
     }
+    public function linkServiceToSpecialist($service_id, $specialist_id)
+    {
+        $service = Service::find($service_id);
+        $specialist = Specialist::find($specialist_id);
+
+        if (!$service || !$specialist) {
+            return response()->json(['message' => 'Service or Specialist not found'], 404);
+        }
+
+        $serviceSpecialist = new Service_Specialist();
+        $serviceSpecialist->service_id = $service->id ;
+        $serviceSpecialist->specialist_id = $specialist->id;
+        $serviceSpecialist->save();
+        return response()->json(['message' => 'Specialist linked to service successfully']);
+    }
+
+
+    public function unlinkServiceFromSpecialist($service_id, $specialist_id)
+    {
+        $service = Service_Specialist::find($service_id);
+        $specialist = Service_Specialist::find($specialist_id);
+
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+        if (!$specialist) {
+            return response()->json(['message' => 'specialist not found'], 404);
+        }
+
+        $service->specialists()->detach($specialist_id);
+
+        return response()->json(['message' => 'Specialist unlinked from service successfully']);
+    }
+
+
+
     public function getSpecialistNamesByServiceId($service_id)
     {
         // جلب السجلات التي تحتوي على نفس service_id

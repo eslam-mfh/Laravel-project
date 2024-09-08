@@ -44,26 +44,23 @@ class ServiceController extends Controller
             'description' => 'required|string',
             'price' => 'required|integer',
             'topServices' => 'boolean',
-            'imageBase64' => 'nullable|string', // التحقق من أن الصورة موجودة كسلسلة
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
-            // تحقق من وجود الصورة كـ Base64
-            if ($request->has('imageBase64') && !empty($request->imageBase64)) {
-                // فك ترميز Base64 وحفظ الصورة
-                $imageData = base64_decode($request->imageBase64);
-                $imageName = time() . '.png'; // يمكنك تحديد الامتداد المناسب بناءً على نوع الصورة
-                file_put_contents(public_path('images') . '/' . $imageName, $imageData);
-                $validatedData['image'] = $imageName;
+            if ($request->hasFile('image')) {
+
+                $imageName = time().'.'.$request->image->extension();
+                $request->image->move(public_path('images'), $imageName);
+                $validatedData['image'] = '/images/' . $imageName;
             }
 
-            // إنشاء الخدمة باستخدام البيانات المرسلة
             $ser = Service::create($validatedData);
 
             return response()->json([
                 "message" => "Service added successfully",
                 "data" => $ser,
-                "image_url" => url('images/' . $ser->image) // تضمين رابط الصورة في الاستجابة
+                "image_url" => isset($ser->image) ? url($ser->image) : null
             ], 201);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error adding Service", "error" => $e->getMessage()], 500);
@@ -108,42 +105,42 @@ class ServiceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // التحقق من صحة البيانات المرسلة
+
         $validatedData = $request->validate([
-            'category_id' => 'exists:categories,id',
-            'name' => 'string|max:255',
-            'description' => 'string',
-            'price' => 'integer',
-            'topServices' => 'boolean',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // تحقق من الصورة
+            'category_id' => 'sometimes|exists:categories,id',
+            'name' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+            'price' => 'sometimes|nullable|numeric',
+            'topServices' => 'sometimes|boolean',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
             $ser = Service::findOrFail($id);
 
-            // معالجة الصورة إذا كانت موجودة
+
             if ($request->hasFile('image')) {
-                // حذف الصورة القديمة إذا كانت موجودة
+
                 if ($ser->image) {
-                    $oldImagePath = public_path('images/'.$ser->image);
+                    $oldImagePath = public_path($ser->image);
                     if (file_exists($oldImagePath)) {
                         unlink($oldImagePath);
                     }
                 }
 
-                // حفظ الصورة الجديدة في ملف
+
                 $imageName = time().'.'.$request->image->extension();
                 $request->image->move(public_path('images'), $imageName);
-                $validatedData['image'] = $imageName;
+                $validatedData['image'] = '/images/' . $imageName;
             }
 
-            // تحديث الحقول المرسلة فقط
+
             $ser->update($validatedData);
 
             return response()->json([
                 "message" => "Service updated successfully",
                 "data" => $ser,
-                "image_url" => isset($validatedData['image']) ? url('images/'.$validatedData['image']) : url('images/'.$ser->image)
+                "image_url" => isset($validatedData['image']) ? url($validatedData['image']) : url($ser->image)
             ], 200);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error updating Service", "error" => $e->getMessage()], 500);
@@ -161,7 +158,7 @@ class ServiceController extends Controller
         try {
             $ser = Service::findOrFail($id);
 
-            // Check if the service is associated with any offers
+
             if (Offer_Service::where('service_id', $id)->exists()) {
                 return response()->json(["message" => "Cannot delete service. It is associated with an offer and must be deleted from the offer first."], 400);
             }

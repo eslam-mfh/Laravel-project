@@ -65,28 +65,30 @@ class SpecialistController extends Controller
      */
     public function store(Request $request)
     {
-        // التحقق من صحة البيانات المرسلة
+
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // تحقق من الصورة
+            'specialization' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         try {
-            // معالجة الصورة إذا كانت موجودة
+
             if ($request->hasFile('image')) {
+                $image = $request->file('image');
                 $imageName = time() . '.' . $request->image->extension();
                 $request->image->move(public_path('images'), $imageName);
-                $validatedData['image'] = $imageName;
+                $validatedData['image'] = '/images/' . $imageName;
             }
 
-            // إنشاء الـ Specialist باستخدام البيانات المرسلة
+
             $specialist = Specialist::create($validatedData);
 
             return response()->json([
                 "message" => "Specialist added successfully",
                 "data" => $specialist,
-                "image_url" => isset($validatedData['image']) ? url('images/' . $validatedData['image']) : null
+                "image_url" => isset($validatedData['image']) ? url($validatedData['image']) : null
             ], 201);
         } catch (\Exception $e) {
             return response()->json(["message" => "Error adding specialist", "error" => $e->getMessage()], 500);
@@ -126,57 +128,58 @@ class SpecialistController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (auth()->user()->role_id == 2) {
-            // التحقق من صحة البيانات المرسلة
-            $validatedData = $request->validate([
-                'name' => 'string|max:255',
-                'description' => 'string|max:255',
-                'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // تحقق من الصورة
-            ]);
 
-            try {
-                // العثور على السجل المطلوب
-                $specialist = Specialist::findOrFail($id);
 
-                // تحديث البيانات الأساسية
-                if ($request->has('name')) {
-                    $specialist->name = $request->input('name');
-                }
-                if ($request->has('description')) {
-                    $specialist->description = $request->input('description');
-                }
+        $validatedData = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string|max:255',
+            'specialization' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // تحقق من الصورة
+        ]);
 
-                // معالجة الصورة إذا كانت موجودة
-                if ($request->hasFile('image')) {
-                    // حذف الصورة القديمة إذا كانت موجودة
-                    if ($specialist->image) {
-                        $oldImagePath = public_path('images/' . $specialist->image);
-                        if (file_exists($oldImagePath)) {
-                            unlink($oldImagePath);
-                        }
-                    }
+        try {
 
-                    // حفظ الصورة الجديدة
-                    $imageName = time() . '.' . $request->image->extension();
-                    $request->image->move(public_path('images'), $imageName);
-                    $specialist->image = $imageName;
-                }
+            $specialist = Specialist::findOrFail($id);
 
-                // حفظ التغييرات
-                $specialist->save();
-
-                return response()->json([
-                    "message" => "Specialist updated successfully",
-                    "data" => $specialist,
-                    "image_url" => isset($specialist->image) ? url('images/' . $specialist->image) : null
-                ], 200);
-
-            } catch (\Exception $e) {
-                return response()->json(["message" => "Error updating Specialist", "error" => $e->getMessage()], 500);
+            if ($request->has('name')) {
+                $specialist->name = $request->input('name');
             }
-        } else {
-            return response()->json("Unauthorized", 403);
+            if ($request->has('description')) {
+                $specialist->description = $request->input('description');
+            }
+            if ($request->has('specialization')) {
+                $specialist->specialization = $request->input('specialization');
+            }
+
+
+            if ($request->hasFile('image')) {
+
+                if ($specialist->image) {
+                    $oldImagePath = public_path($specialist->image);
+                    if (file_exists($oldImagePath)) {
+                        unlink($oldImagePath);
+                    }
+                }
+
+
+                $imageName = time() . '.' . $request->image->extension();
+                $request->image->move(public_path('images'), $imageName);
+                $specialist->image = '/images/' . $imageName;
+            }
+
+
+            $specialist->save();
+
+            return response()->json([
+                "message" => "Specialist updated successfully",
+                "data" => $specialist,
+                "image_url" => isset($specialist->image) ? url($specialist->image) : null
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(["message" => "Error updating Specialist", "error" => $e->getMessage()], 500);
         }
+
     }
 
     /**
@@ -187,13 +190,10 @@ class SpecialistController extends Controller
      */
     public function destroy( $id)
     {
-        if (auth()->user()->role_id == 2 ) {
             $specialist = Specialist::findOrFail($id);
             $specialist->delete();
             return response()->json("deleted");
-        } else {
-            return response()->json("Unauthorized", 403);
-        }
+
     }
 
 

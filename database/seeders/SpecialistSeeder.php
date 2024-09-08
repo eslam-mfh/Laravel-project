@@ -21,57 +21,46 @@ class SpecialistSeeder extends Seeder
             [
                 'name' => 'Dr.Yara taki aldeen',
                 'description' => '4 years experience',
-                'specialization' => 'Skin care'
             ],
             [
-                'name' => 'Ph.massa shbib',
+                'name' => 'Ph.Yara taki aldeen',
                 'description' => '4 years experience',
-                'specialization' => 'Skin care'
             ],
             ///////////
             [
                 'name' => 'Dr.Nazmi derwan',
                 'description' => '4 years experience',
-                'specialization' => 'Dental care'
             ],
             ///////////
             [
                 'name' => 'Fatima alazn',
                 'description' => '4 years experience',
-                'specialization' => 'Dental care'
             ],
             /////////
             [
                 'name' => 'Dr.loriel domt',
                 'description' => '6 years experience',
-                'specialization' => 'Plastic surgery'
             ],
             [
                 'name' => 'Dr.Hasan alsosi',
                 'description' => '5 years experience',
-                'specialization' => 'Plastic surgery'
-
             ],
             [
                 'name' => 'Dr.Ghanwa abboud',
                 'description' => '4 years experience',
-                'specialization' => 'Plastic surgery'
             ],
             ///////////
             [
                 'name' => 'Nour',
                 'description' => '4 years experience',
-                'specialization' => 'Laser'
             ],
             [
                 'name' => 'Solaf',
                 'description' => '2 years experience',
-                'specialization' => 'Laser'
             ],
             [
                 'name' => 'Anwar',
                 'description' => '2 years experience',
-                'specialization' => 'Laser'
             ],
 
 

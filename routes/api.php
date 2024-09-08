@@ -4,6 +4,7 @@ use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\AdviceController;
 use App\Http\Controllers\BookOffersController;
 use App\Http\Controllers\MediaController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ReviewsController;
 use App\Http\Controllers\ServiceSpecialistController;
 use App\Http\Controllers\SessionController;
@@ -92,5 +93,9 @@ Route::middleware('auth')->group(function () {
     /////////////////
     Route::post('addReview', [ReviewsController::class, 'addReview']);
     Route::post('rate', [ReviewsController::class, 'rate']);
+    Route::post('get-product', [ProductController::class, 'getProductByQuestions']);
+    Route::post('/editSpecialist/{id}', [specialistController::class , 'update']);//edit specialist
+    Route::get('/link-service-specialist/{service_id}/{specialist_id}', [ServiceSpecialistController::class, 'linkServiceToSpecialist']);
+    Route::get('/unlink-service-specialist/{service_id}/{specialist_id}', [ServiceSpecialistController::class, 'unlinkServiceFromSpecialist']);
 
 });

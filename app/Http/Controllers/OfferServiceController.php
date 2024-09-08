@@ -100,7 +100,6 @@ class OfferServiceController extends Controller
     public function services ($id)
     {
         $offers=Offer_Service::where('id' , $id)->get('service_id') ;
-        //$ser=Offer_Service::where('Offer_id' ,$offer ) ;
         $service = Service::where('id', $offers )->get('name');
         return response()->json($service );
     }

@@ -50,8 +50,19 @@ class AdviceController extends Controller
 
         if ($media = $request->file('media')) {
             $mediaName = time() . '_' . $media->getClientOriginalName();
-            $mediaPath = $media->storeAs('uploads', $mediaName, 'public');
-            $adviceData['media'] = $mediaPath;
+
+
+            $destinationPath = public_path('/images/videos');
+
+
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+
+            $media->move($destinationPath, $mediaName);
+
+            $adviceData['media'] = '/images/videos/' . $mediaName;
             $adviceData['media_type'] = $media->getClientMimeType();
         }
 
@@ -59,6 +70,8 @@ class AdviceController extends Controller
 
         return response()->json(['advice' => $advice], 201);
     }
+
+
 
 
     /**
@@ -69,8 +82,8 @@ class AdviceController extends Controller
      */
     public function show($id)
     {
-     $advice=Advice::findOrFail($id);
-     return response()->json($advice);
+        $advice=Advice::findOrFail($id);
+        return response()->json($advice);
     }
 
     /**
@@ -93,28 +106,40 @@ class AdviceController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $advice = Advice::findOrFail($id);
+
 
         $request->validate([
             'advice' => 'nullable|string',
             'media' => 'nullable|file|mimes:jpeg,png,jpg,gif,mp4,mov,avi|max:20480', // الصور والفيديوهات بحد أقصى 20 ميجابايت
         ]);
 
+
         if ($adviceText = $request->input('advice')) {
             $advice->advice = $adviceText;
         }
 
         if ($media = $request->file('media')) {
+
+            $destinationPath = public_path('images/videos');
+
+
             $mediaName = time() . '_' . $media->getClientOriginalName();
-            $mediaPath = $media->storeAs('uploads', $mediaName, 'public');
-            $advice->media = $mediaPath;
+
+
+            $media->move($destinationPath, $mediaName);
+
+            $advice->media = 'images/videos/' . $mediaName;
             $advice->media_type = $media->getClientMimeType();
         }
+
 
         $advice->save();
 
         return response()->json(['advice' => $advice], 200);
     }
+
 
 
     /**
